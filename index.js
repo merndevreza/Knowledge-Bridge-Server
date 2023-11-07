@@ -71,9 +71,15 @@ async function run() {
           rating: updateRequest.rating,
         },
       };
-
-      const result = await booksCollection.updateOne(query,updateDoc);
-      res.send(result)
+      const result = await booksCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
+    // read category products
+    app.get("/category/:id", async (req, res) => {
+      const categoryName = req.params.id;
+      const query = { category: categoryName };
+      const result = await booksCollection.find(query).toArray();
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
