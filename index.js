@@ -6,7 +6,7 @@ const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 5000;
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 //======================
 //middleware
@@ -44,6 +44,36 @@ async function run() {
       const book = req.body;
       const result = await booksCollection.insertOne(book);
       res.send(result);
+    });
+    //read all book
+    app.get("/books", async (req, res) => {
+      const result = await booksCollection.find().toArray();
+      res.send(result);
+    });
+    //read single book
+    app.get("/books/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await booksCollection.findOne(query);
+      res.send(result);
+    });
+    // update a single book info
+    app.patch("/books/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const updateRequest = req.body;
+      const updateDoc = {
+        $set: {
+          bookName: updateRequest.bookName,
+          authorName: updateRequest.authorName,
+          photo: updateRequest.photo,
+          category: updateRequest.category,
+          rating: updateRequest.rating,
+        },
+      };
+
+      const result = await booksCollection.updateOne(query,updateDoc);
+      res.send(result)
     });
 
     // Send a ping to confirm a successful connection
