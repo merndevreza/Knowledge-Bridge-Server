@@ -73,7 +73,7 @@ async function run() {
       res
         .cookie("token", token, {
           httpOnly: true,
-          secure: true,
+          secure: false,
         })
         .send({ success: true });
     });
