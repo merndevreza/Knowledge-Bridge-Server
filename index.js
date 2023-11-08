@@ -36,6 +36,7 @@ async function run() {
 
     const database = client.db("knowledgeBridge");
     const booksCollection = database.collection("books");
+    const BorrowedBooksCollection = database.collection("BorrowedBooks");
     //==========
     // Books
     //==========
@@ -69,11 +70,13 @@ async function run() {
           photo: updateRequest.photo,
           category: updateRequest.category,
           rating: updateRequest.rating,
+          quantity: updateRequest.quantity
         },
       };
       const result = await booksCollection.updateOne(query, updateDoc);
       res.send(result);
     });
+    
     // read category products
     app.get("/category/:id", async (req, res) => {
       const categoryName = req.params.id;
@@ -81,6 +84,25 @@ async function run() {
       const result = await booksCollection.find(query).toArray();
       res.send(result);
     });
+    //==========
+    // Borrowed Books
+    //==========
+    app.post("/borrowed-books",async(req,res)=>{
+      const borrowedBook= req.body;
+      const result= await BorrowedBooksCollection.insertOne(borrowedBook);
+      res.send(result)
+    })
+    app.get("/borrowed-books/:id",async(req,res)=>{
+      const userEmail = req.params.id;
+      const query = { userEmail: userEmail };
+      const result = await BorrowedBooksCollection.find(query).toArray();
+      res.send(result);
+    })
+
+
+
+
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
