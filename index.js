@@ -89,13 +89,13 @@ async function run() {
     const booksCollection = database.collection("books");
     const BorrowedBooksCollection = database.collection("BorrowedBooks");
     // add book
-    app.post("/books", async (req, res) => {
+    app.post("/books",verifyToken, async (req, res) => {
       const book = req.body;
       const result = await booksCollection.insertOne(book);
       res.send(result);
     });
     //read all book
-    app.get("/books", async (req, res) => {
+    app.get("/books",verifyToken, async (req, res) => {
       const result = await booksCollection.find().toArray();
       res.send(result);
     });
