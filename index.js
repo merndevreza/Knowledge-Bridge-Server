@@ -15,7 +15,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 //======================
 app.use(
   cors({
-    origin: ["https://knowledge-bridge-d084c.web.app"],
+    origin: ["https://knowledge-bridge-d084c.web.app", "http://localhost:5173"],
     credentials: true,
   })
 );
