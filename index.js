@@ -5,6 +5,7 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 5000;
+require('dotenv').config();
 
 const jwt = require("jsonwebtoken");
 const cookieParser = require('cookie-parser')
@@ -15,7 +16,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 //======================
 app.use(
   cors({
-    origin: ["https://knowledge-bridge-d084c.web.app", "http://localhost:5173"],
+    origin: ["https://knowledge-bridge-d084c.web.app", "http://localhost:5174","http://localhost:5173"],
     credentials: true,
   })
 );
@@ -43,7 +44,7 @@ const verifyToken = async (req, res, next) => {
 //MongoDB config
 //======================
 
-const uri = `mongodb+srv://rk-knowledge-bridge:Qgj8DUQX28gweHY0@cluster0.ojansry.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ojansry.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -57,15 +58,14 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     //=================
     // Authentication
     //=================
     app.post("/jwt", async (req, res) => {
       const userEmail = req.body;
       const token = jwt.sign(
-        userEmail,
-        "7429aef8c1fd9ed474e980cd8b5e9760aef2214928cd3fd896064df38efdedb2163bf796c22cba3fdcaac6188b18838bbaef1b56b6be2aa9bc68ec770be710c4",
+        userEmail, process.env.ACCESS_TOKEN_SECRET,
         {
           expiresIn: "1h",
         }
@@ -87,9 +87,10 @@ async function run() {
 
     const database = client.db("knowledgeBridge");
     const booksCollection = database.collection("books");
+    const preBookingsCollection = database.collection("pre-bookings");
     const BorrowedBooksCollection = database.collection("BorrowedBooks");
     // add book
-    app.post("/books", async (req, res) => {
+    app.post("/books",verifyToken, async (req, res) => {
       const book = req.body;
       const result = await booksCollection.insertOne(book);
       res.send(result);
@@ -140,6 +141,11 @@ async function run() {
       const result = await BorrowedBooksCollection.insertOne(borrowedBook);
       res.send(result);
     });
+    app.post("/pre-bookings", async (req, res) => {
+      const perBooked = req.body;
+      const result = await preBookingsCollection.insertOne(perBooked);
+      res.send(result);
+    });
     app.get("/borrowed-books/:id", async (req, res) => {
       const userEmail = req.params.id;
       const query = { userEmail: userEmail };
@@ -154,7 +160,7 @@ async function run() {
     });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
