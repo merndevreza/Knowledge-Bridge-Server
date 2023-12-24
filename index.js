@@ -88,11 +88,18 @@ async function run() {
     const database = client.db("knowledgeBridge");
     const booksCollection = database.collection("books");
     const preBookingsCollection = database.collection("pre-bookings");
+    const requestedBooksCollection = database.collection("requested-books");
     const BorrowedBooksCollection = database.collection("BorrowedBooks");
     // add book
-    app.post("/books",verifyToken, async (req, res) => {
+    app.post("/books", async (req, res) => {
       const book = req.body;
       const result = await booksCollection.insertOne(book);
+      res.send(result);
+    });
+    // Request for a book
+    app.post("/request-a-book", async (req, res) => {
+      const requestedBook = req.body;
+      const result = await requestedBooksCollection.insertOne(requestedBook);
       res.send(result);
     });
     //read all book
